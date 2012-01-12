@@ -76,6 +76,7 @@ data_bag("apps").each do |entry|
 
   execute "nxensite #{ app['id'] }" do
     command "/usr/sbin/nxensite #{ app['id']}"
+    only_if {File.exists?(app_root)}
   end
 
   service "nginx" do
@@ -98,3 +99,4 @@ data_bag("apps").each do |entry|
     only_if {File.exists?(app_root)}
   end
 end
+

@@ -56,8 +56,15 @@ data_bag("apps").each do |entry|
   app = data_bag_item("apps", entry)
   log app.to_json
 
-  app_root = "/var/www/#{app['id']}/current"
-  doc_root = "/var/www/#{app['id']}/current/public"
+  app_root    = "/var/www/#{app['id']}/current"
+  doc_root    = "/var/www/#{app['id']}/current/public"
+  shared_root = "/var/www/#{app['id']}/shared"
+
+  directory shared_root do
+    owner 'deploy'
+    group 'sysadmin'
+    recursive true
+  end
 
   template "/etc/nginx/sites-available/#{app['id']}" do
     source "default-site.erb"
@@ -66,35 +73,35 @@ data_bag("apps").each do |entry|
     mode 0644
     Chef::Log.info("Node environment: #{environment}")
     variables(
-              :app => app['id'],
-              :server_name => app['domains'][environment],
-              :port => app['port'],
-              :document_root => doc_root
-              )
-    only_if {File.exists?(app_root)}
+      :app           => app['id'],
+      :server_name   => app['domains'][environment],
+      :port          => app['unicorn_port'],
+      :document_root => doc_root
+    )
+    # only_if {File.exists?(app_root)}
   end
 
   execute "nxensite #{ app['id'] }" do
     command "/usr/sbin/nxensite #{ app['id']}"
+    only_if {File.exists?(app_root)}
   end
 
   service "nginx" do
     supports :status => true, :restart => true, :reload => true
     action [ :enable, :restart ]
-    only_if {File.exists?(app_root)}
   end
 
   # auto create unicorn.rb per app
   # might be better to not have this in the run
-  template "#{app_root}/config/unicorn.rb" do
+  template "#{shared_root}/unicorn.rb" do
     owner 'deploy'
     group 'sysadmin'
     source "unicorn.conf.rb.erb"
     mode "0664"
     variables(
-              :app => app['id'],
-              :port => app['port']
-              )
-    only_if {File.exists?(app_root)}
+      :app => app['id'],
+      :port => app['unicorn_port']
+    )
+    # only_if {File.exists?(app_root)}
   end
 end

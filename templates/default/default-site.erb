@@ -19,7 +19,7 @@ server {
   listen 8080;
 
   client_max_body_size 4G;
-  server_name <%= @server_name %>;
+  server_name <%= @server_names.join(' ') %>;
 
   # ~2 seconds is often enough for most folks to parse HTML/CSS and
   # retrieve needed images/icons/frames, connections are cheap in
@@ -51,7 +51,7 @@ server {
 
     # pass the Host: header from the client right along so redirects
     # can be set properly within the Rack application
-    proxy_set_header Host $http_host;
+    proxy_set_header Host <%= @host_header %>;
 
     # we don't want nginx trying to do something clever with
     # redirects, we set the Host: header above already.

@@ -67,20 +67,23 @@ data_bag("apps").each do |entry|
     recursive true
   end
 
-  template "/etc/nginx/sites-available/#{app['id']}" do
-    source "default-site.erb"
-    owner "root"
-    group "root"
-    mode 0644
-    Chef::Log.info("Node environment: #{environment}")
-    variables(
-      :app           => app['id'],
-      :port          => app['unicorn_port'],
-      :server_names  => env_config['domains'],
-      :host_header   => env_config['domains'].first,
-      :document_root => doc_root
-    )
-    # only_if {File.exists?(app_root)}
+  # Don't write a default vhost if this app has a custom one
+  unless app['vhost']
+    template "/etc/nginx/sites-available/#{app['id']}" do
+      source "default-site.erb"
+      owner "root"
+      group "root"
+      mode 0644
+      Chef::Log.info("Node environment: #{environment}")
+      variables(
+        :app           => app['id'],
+        :port          => app['unicorn_port'],
+        :server_names  => env_config['domains'],
+        :host_header   => env_config['domains'].first,
+        :document_root => doc_root
+      )
+      # only_if {File.exists?(app_root)}
+    end
   end
 
   execute "nxensite #{ app['id'] }" do

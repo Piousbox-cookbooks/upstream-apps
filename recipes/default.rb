@@ -59,6 +59,7 @@ data_bag("apps").each do |entry|
   app_root    = "/var/www/#{app['id']}/current"
   doc_root    = "/var/www/#{app['id']}/current/public"
   shared_root = "/var/www/#{app['id']}/shared"
+  env_config  = app[environment]
 
   directory shared_root do
     owner 'deploy'
@@ -74,8 +75,9 @@ data_bag("apps").each do |entry|
     Chef::Log.info("Node environment: #{environment}")
     variables(
       :app           => app['id'],
-      :server_name   => app['domains'][environment],
       :port          => app['unicorn_port'],
+      :server_names  => env_config['domains'],
+      :host_header   => env_config['domains'].first,
       :document_root => doc_root
     )
     # only_if {File.exists?(app_root)}

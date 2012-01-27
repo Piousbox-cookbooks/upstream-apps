@@ -77,7 +77,6 @@ data_bag("apps").each do |entry|
       Chef::Log.info("Node environment: #{environment}")
       variables(
         :app           => app['id'],
-        :port          => app['unicorn_port'],
         :server_names  => env_config['domains'],
         :host_header   => env_config['domains'].first,
         :document_root => doc_root

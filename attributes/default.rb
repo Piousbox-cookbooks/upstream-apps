@@ -1,1 +1,2 @@
-# default[:project] = 'target_tgtapps'
+
+default[:nginx][:http_port] = 8080

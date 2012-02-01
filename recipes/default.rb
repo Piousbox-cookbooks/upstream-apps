@@ -75,7 +75,7 @@ data_bag("apps").each do |entry|
   end
 
   # Don't write a default vhost if this app has a custom one
-  unless env_config['vhost'] || app['vhost']
+  unless env_config['vhost']
     template "/etc/nginx/sites-available/#{app['id']}" do
       source "default-site.erb"
       owner "root"

@@ -51,6 +51,13 @@ gems.each do |gem|
   end
 end
 
+%w{default default-ssl}.each do |site|
+  execute "disable-sites-enabled-#{site}" do
+    command "/usr/sbin/nxdissite #{site}"
+    only_if { File.exists? "/etc/nginx/sites-enabled/#{site}" }
+  end
+end
+
 # iterate over apps databag adn set up each app
 data_bag("apps").each do |entry|
   app = data_bag_item("apps", entry)
@@ -77,7 +84,6 @@ data_bag("apps").each do |entry|
       Chef::Log.info("Node environment: #{environment}")
       variables(
         :app           => app['id'],
-        :port          => app['unicorn_port'],
         :server_names  => env_config['domains'],
         :host_header   => env_config['domains'].first,
         :document_root => doc_root
@@ -90,7 +96,7 @@ data_bag("apps").each do |entry|
     command "/usr/sbin/nxensite #{ app['id']}"
     only_if {File.exists?(app_root)}
   end
-
+  
   service "nginx" do
     supports :status => true, :restart => true, :reload => true
     action [ :enable, :restart ]

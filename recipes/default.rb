@@ -58,6 +58,18 @@ end
   end
 end
 
+# add the health check proxy vhost as the default vhost
+template "/etc/nginx/sites-available/health-check" do
+  source "health-check.erb"
+  owner "root"
+  group "root"
+  mode 0644
+end
+
+execute "nxensite health-check" do
+  command "/usr/sbin/nxensite health-check"
+end
+
 # iterate over apps databag adn set up each app
 data_bag("apps").each do |entry|
   app = data_bag_item("apps", entry)
@@ -77,7 +89,7 @@ data_bag("apps").each do |entry|
   # Don't write a default vhost if this app has a custom one
   unless env_config['vhost']
     template "/etc/nginx/sites-available/#{app['id']}" do
-      source "default-site.erb"
+      source "upstream-app.erb"
       owner "root"
       group "root"
       mode 0644

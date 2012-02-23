@@ -1,6 +1,6 @@
 server {
   server_name _;
-  listen <%= node[:nginx][:http_port] %> default_server;
+  listen <%= node[:nginx][:http_port] %>;
 
   client_max_body_size 4G;
   keepalive_timeout 5;

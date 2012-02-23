@@ -1,13 +1,19 @@
 server {
   server_name _;
-  listen <%= node[:nginx][:http_port] %>;
+  listen <%= node[:nginx][:http_port] %> default;
 
   client_max_body_size 4G;
   keepalive_timeout 5;
 
-  location ~ .* {
+  location / {
+    set $proxy_domain "";
+
     if ( $args ~ "^domain=(.+)" ) {
       set $proxy_domain $1;
+    }
+
+    if ( $proxy_domain = "" ) {
+      return 200;
     }
 
     proxy_set_header Host $proxy_domain;

@@ -108,7 +108,7 @@ data_bag("apps").each do |entry|
     command "/usr/sbin/nxensite #{ app['id']}"
     only_if {File.exists?(app_root)}
   end
-  
+
   service "nginx" do
     supports :status => true, :restart => true, :reload => true
     action [ :enable, :restart ]
@@ -126,6 +126,29 @@ data_bag("apps").each do |entry|
       :port => app['unicorn_port']
     )
     # only_if {File.exists?(app_root)}
+  end
+
+  # Creat an upstart script for this app
+  upstart_script_name = "#{app['id']}-app"
+
+  template "/etc/init/#{upstart_script_name}.conf" do
+    source "unicorn-upstart.conf.erb"
+    owner "root"
+    group "root"
+    mode "0664"
+
+    variables(
+      :app_name       => app['id'],
+      :app_root       => app_root,
+      :log_file       => "#{app_root}/log/unicorn.log",
+      :unicorn_config => "#{shared_root}/unicorn.rb",
+      :unicorn_binary => "bundle exec unicorn",
+      :rack_env       => environment
+    )
+  end
+
+  link "/etc/init.d/#{upstart_script_name}" do
+    to "/lib/init/upstart-job"
   end
 end
 

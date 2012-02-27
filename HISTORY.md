@@ -1,3 +1,8 @@
+## 0.2.7 (2012-02-24)
+
+* Add an upstart script for each app
+  If app is named "facebooktabs", service is named "facebooktabs-app"
+
 ## 0.2.6 (2012-02-23)
 
 * Add a health check proxy vhost as the default vhost

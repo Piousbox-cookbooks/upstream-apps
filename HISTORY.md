@@ -1,3 +1,7 @@
+## 0.2.8 (2012-03-01)
+
+* Make health check proxy optional
+
 ## 0.2.7 (2012-02-24)
 
 * Add an upstart script for each app

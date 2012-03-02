@@ -58,16 +58,18 @@ end
   end
 end
 
-# add the health check proxy vhost as the default vhost
-template "/etc/nginx/sites-available/_health-check" do
-  source "health-check.erb"
-  owner "root"
-  group "root"
-  mode 0644
-end
+if node[:upstream_apps][:health_check]
+  # add the health check proxy vhost as the default vhost
+  template "/etc/nginx/sites-available/_health-check" do
+    source "health-check.erb"
+    owner "root"
+    group "root"
+    mode 0644
+  end
 
-execute "nxensite _health-check" do
-  command "/usr/sbin/nxensite _health-check"
+  execute "nxensite _health-check" do
+    command "/usr/sbin/nxensite _health-check"
+  end
 end
 
 # iterate over apps databag adn set up each app

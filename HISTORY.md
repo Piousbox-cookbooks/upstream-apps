@@ -1,3 +1,7 @@
+## 0.2.9 (2012-03-08)
+
+* Revert disabling of default-ssl, upstream apps shouldn't care about default-ssl
+
 ## 0.2.8 (2012-03-01)
 
 * Make health check proxy optional

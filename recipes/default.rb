@@ -51,7 +51,7 @@ gems.each do |gem|
   end
 end
 
-%w{default default-ssl}.each do |site|
+%w{default}.each do |site|
   execute "disable-sites-enabled-#{site}" do
     command "/usr/sbin/nxdissite #{site}"
     only_if { File.exists? "/etc/nginx/sites-enabled/#{site}" }

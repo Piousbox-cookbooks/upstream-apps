@@ -1,3 +1,10 @@
+## 0.3.1 (2012003-08)
+
+* Only generate unicorn config/upstart script if config.ru is detected
+* Actually start the upstart script!
+* Skipped 0.3.0 as this was a version already running on audi-apps but
+  never commited
+
 ## 0.2.9 (2012-03-08)
 
 * Revert disabling of default-ssl, upstream apps shouldn't care about default-ssl

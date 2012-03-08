@@ -116,41 +116,53 @@ data_bag("apps").each do |entry|
     action [ :enable, :restart ]
   end
 
-  # auto create unicorn.rb per app
-  # might be better to not have this in the run
-  template "#{shared_root}/unicorn.rb" do
-    owner 'deploy'
-    group 'sysadmin'
-    source "unicorn.conf.rb.erb"
-    mode "0664"
-    variables(
-      :app => app['id'],
-      :port => app['unicorn_port']
-    )
-    # only_if {File.exists?(app_root)}
+  if File.exist?("#{app_root}/config.ru")
+    Chef::Log.info("Rack app detected for #{app['id']}, generating unicorn hooks")
+
+    # auto create unicorn.rb per app
+    # might be better to not have this in the run
+    template "#{shared_root}/unicorn.rb" do
+      owner 'deploy'
+      group 'sysadmin'
+      source "unicorn.conf.rb.erb"
+      mode "0664"
+      variables(
+        :app => app['id'],
+        :port => app['unicorn_port']
+      )
+      # only_if {File.exists?(app_root)}
+    end
+
+    # Creat an upstart script for this app
+    upstart_script_name = "#{app['id']}-app"
+
+    template "/etc/init/#{upstart_script_name}.conf" do
+      source "unicorn-upstart.conf.erb"
+      owner "root"
+      group "root"
+      mode "0664"
+
+      variables(
+        :app_name       => app['id'],
+        :app_root       => app_root,
+        :log_file       => "#{app_root}/log/unicorn.log",
+        :unicorn_config => "#{shared_root}/unicorn.rb",
+        :unicorn_binary => "bundle exec unicorn",
+        :rack_env       => environment
+      )
+    end
+
+    link "/etc/init.d/#{upstart_script_name}" do
+      to "/lib/init/upstart-job"
+    end
+
+    service upstart_script_name do
+      provider Chef::Provider::Service::Upstart
+      supports :status => true, :restart => true
+      action [ :enable, :start ]
+    end
+
   end
 
-  # Creat an upstart script for this app
-  upstart_script_name = "#{app['id']}-app"
-
-  template "/etc/init/#{upstart_script_name}.conf" do
-    source "unicorn-upstart.conf.erb"
-    owner "root"
-    group "root"
-    mode "0664"
-
-    variables(
-      :app_name       => app['id'],
-      :app_root       => app_root,
-      :log_file       => "#{app_root}/log/unicorn.log",
-      :unicorn_config => "#{shared_root}/unicorn.rb",
-      :unicorn_binary => "bundle exec unicorn",
-      :rack_env       => environment
-    )
-  end
-
-  link "/etc/init.d/#{upstart_script_name}" do
-    to "/lib/init/upstart-job"
-  end
 end
 

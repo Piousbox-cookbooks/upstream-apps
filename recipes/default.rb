@@ -75,7 +75,16 @@ end
 # iterate over apps databag adn set up each app
 data_bag("apps").each do |entry|
   app = data_bag_item("apps", entry)
-  log app.to_json
+
+  if app["server_roles"].nil?
+    Chef::Log.info("#{app['id']} does not have server_roles defined")
+    Chef::Log.info("Installing #{app['id']}")
+  elsif app["server_roles"] && app["server_roles"].any? { |role| node.role?(role) }
+    Chef::Log.info("Installing #{app['id']}")
+  else
+    Chef::Log.info("Node does not have any of the following roles [ #{app['server_roles'].join(', ')} ], skipping this app")
+    next
+  end
 
   app_root    = "/var/www/#{app['id']}/current"
   doc_root    = "/var/www/#{app['id']}/current/public"

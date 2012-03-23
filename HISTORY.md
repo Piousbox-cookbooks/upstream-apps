@@ -1,4 +1,9 @@
-## 0.3.1 (2012003-08)
+## 0.4.0 (2010-03-23)
+
+* Only deploy app if node has a role included in the list of server roles in
+  the app data bag: app["server_roles"].any? { |role| node.role?(role) }
+
+## 0.3.1 (2012-03-08)
 
 * Only generate unicorn config/upstart script if config.ru is detected
 * Actually start the upstart script!
